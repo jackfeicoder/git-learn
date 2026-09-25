@@ -26,10 +26,25 @@ git status
 git diff 
 
 # 把工作区的改动添加到暂存区
-git add . 
+git add .   # 添加所有文件
+git add <文件名> # 添加指定文件
+
+# 如果把错误的文件加到暂存区了想撤销：
+git restore --staged <文件名>
+# 或者撤销当前目录下所有暂存的文件再重新add 正确的文件
+git restore --staged .
 
 # 把暂存区的改动提交到本地仓库（-m 后的说明应简洁概括本次提交）
 git commit -m "<提交信息>" 
+提交信息打错字了怎么办？
+git commit --amend -m "写对的新提交信息"
+
+
+# 如果把错误的文件本地仓库了想撤销本次commit,但还没推送到远程 GitHub：
+git reset --soft HEAD~1
+HEAD~1：表示“倒退一个版本”（回到上一次 commit）。
+--soft（极度温柔）：只撤销 commit 这个动作，你刚才提交的所有代码完好无损，且依旧老老实实呆在暂存区里！
+然后重新提交对的
 
 # 查看提交历史版本日志
 git log 
@@ -116,9 +131,8 @@ git push                  ➔  日常一键推送
 ## 5. 分支管理
 ### 分支类型
 主分支： main 分支跑的是线上正式运行的业务，一旦写错，系统直接崩溃。
-（真实的工作模式永远是：
-从 main 切出一个属于你自己的分支（例如 feature-login）；
-你在自己的分支里随便折腾、随便提交；开发完毕、测试通过后，再把它**合并（Merge）**回主干）
+（完整大型项目：main主分支上线，dev是开发分支，实现功能从dev切一个将来也合并到dev分支，开发完后从功能分支且一个测试分支，测试完没问题就把测试分支合并到dev分支，一般阶段性所有功能都没问题后，dev合并到main上线）
+（个人开源项目：直接在main分支切出 feature 功能分支，提 Pull Request（代码审查）；审查通过后直接合进 main 自动触发部署。）
 开发分支：dev / develop：日常开发分支，集成所有人的最新代码。
 feature/*（功能分支）：比如 feature-login，开发完特定功能合并后即销毁。
 hotfix/*（紧急修复分支）：线上突发重大 Bug 时，紧急切出来修补的分支。
@@ -131,7 +145,7 @@ Conflict（冲突）
 场景：两个分支改了同一文件的同一行代码。此时 Git 不敢擅自决定，会停下来把两边的代码都标出来，让你手动决定“留谁的”。
 
 
-### 常用命令
+### 常用分支命令
 查看所有本地分支：git branch
 创建并切换分支：git switch -c dev
 在分支上提交新内容
@@ -139,3 +153,17 @@ Conflict（冲突）
 切回主干：git switch main
 合并分支：git merge dev
 安全删除分支（功能合并后清理）：git branch -d <分支名>
+
+git merge 想把代码合给谁，你就先切换（switch）到谁那里
+如果要把功能合入开发分支：
+bash
+git switch dev            # 1. 站到接收者 dev 分支上
+git merge feature-login   # 2. 把你的功能分支吸纳进来
+
+如果到了发版日，要发布上线：
+bash
+git switch main           # 1. 站到正式版 main 分支上
+git merge dev             # 2. 把测试通过的 dev 吸纳进来
+
+### 合并冲突解决
+三种情况
