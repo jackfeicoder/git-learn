@@ -1,0 +1,19 @@
+# 1. 忽略指定名称的文件
+secret.txt
+.env
+
+# 2. 忽略某种后缀的所有文件（通配符 *）
+*.log
+*.tmp
+
+# 3. 忽略整个目录及其内部所有内容（末尾加 /）
+node_modules/
+dist/
+venv/
+.idea/
+
+# 4. 仅忽略根目录下的文件，不忽略子目录里的（开头加 /）
+/todo.txt
+
+# 5. 例外规则（加 ! 表示取反，特例保留）
+!important.log     # 即使上面写了 *.log，依然不忽略这个 important.log
