@@ -224,5 +224,5 @@ git merge --abort
 场景 B：已经推送到远程（公共分支安全回滚）
 bash
 # 生成一个“反向抵消”的新提交，保留主干并剔除合进来的分支改动
-git revert -m 1 <合并的Commit_ID>(git reflog查看)
+git revert -m 1 <合并的Commit_ID>
 git push

@@ -1,6 +1,2 @@
-<<<<<<< HEAD
 main: 你好！这是【main分支】写的内容。
 feature-user:功能分支修改了 hello.txt 文件内容
-=======
-feature-user:功能分支修改了 hello.txt 文件内容
->>>>>>> feature-user
