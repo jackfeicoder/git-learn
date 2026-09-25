@@ -123,6 +123,7 @@ git remote rename <旧别名> <新别名>
 git init                  ➔  开辟本地仓库
 git add .                 ➔  选入暂存区
 git commit -m "..."       ➔  存档版本快照
+-am -a (all) + -m (message) = -am,可以一键把修改加入暂存区并提交，适合改动文件已经跟踪的文件，但不包括新增未跟踪的文件（Untracked files）
 git remote add origin ... ➔  牵线搭桥远程
 git push -u origin main   ➔  首次同步上云
 git push                  ➔  日常一键推送
@@ -167,3 +168,61 @@ git merge dev             # 2. 把测试通过的 dev 吸纳进来
 
 ### 合并冲突解决
 三种情况
+1. 主分支和功能分支都修改了某个文件，主分支要把功能分支合并过来 文件内容冲突
+示例:
+在 main 主分支上修改hello.txt,
+git -am "main添加内容",
+然后切换到功能分支，
+git switch feature-user
+修改 hello.txt,并提交
+git -am "功能分支修改内容",
+再切换到主分支
+git switch main
+然后git merge feature-user
+
+这时候会提示冲突了
+终端：
+CONFLICT (content): Merge conflict in hello.txt
+CONFLICT (content): Merge conflict in readme.md
+Automatic merge failed; fix conflicts and then commit the result.
+
+打开文件可以看到：
+<<<<<<< HEAD
+main: 你好！这是【main分支】写的内容。
+=======
+feature-user:功能分支修改了 hello.txt 文件内容
+>>>>>>> feature-user
+<<<<<<< HEAD：代表**当前你站着的分支（main）**里的代码从这里开始。
+=======：楚河汉界（分界线）。上半部分是 main 的，下半部分是对方的。
+>>>>>>> feature-user：代表**对方分支（feature-user）**带来的改动到这里结束。
+
+解决方式：
+招式一：使用 VS Code 的“一键裁决”按钮（最爽快）
+在 VS Code 里观察那几行代码的正上方，你会看到浮动着几个小字按钮：
+采用当前更口|采用传入的更改|保留双方更改|比较变更
+
+招式二：纯手工删改
+直接把这些 <<<<<<<、=======、>>>>>>> 当作普通文本，统统删掉！ 然后把你和同事商量好的最终代码敲进去保存，然后按照 normales开发流程：
+ 1. 把解决好的文件加入暂存区（告诉 Git：我已经人工裁决完毕）
+git add .
+
+ 2. 正式完成合并提交
+git commit -m "fix: 解决 hello.txt 和 readme.md 的合并冲突"
+解决冲突的半路上反悔了，或者不知道该留谁的想重新来过，随时敲这一行命令：
+git merge --abort
+这相当于一键撤销“正在进行的合并”。
+
+
+2. 合并了，结果发现完全错了，想回退到合并之前的版本
+#### 恢复到合并前的版本
+- **场景 A：尚未推送到远程（本地后悔）**
+  ```bash
+  # 最推荐：利用 Git 记忆点一键秒回合并前
+  git reset --hard ORIG_HEAD
+  # 或者回退一步
+  git reset --hard HEAD~1
+场景 B：已经推送到远程（公共分支安全回滚）
+bash
+# 生成一个“反向抵消”的新提交，保留主干并剔除合进来的分支改动
+git revert -m 1 <合并的Commit_ID>
+git push
